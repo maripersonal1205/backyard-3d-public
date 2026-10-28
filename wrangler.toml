@@ -1,0 +1,20 @@
+# Cloudflare Pages project for the shared (passcode) app. Connected to GitHub
+# (this repository): every push to main publishes the site,
+# and other branches (dev) get a test link. Cloudflare runs
+# `node tools/stage-deploy.mjs` as the build command and serves .deploy/.
+# Secrets are set in the dashboard, not in this file:
+# Pages → Settings → Variables and Secrets → PASSCODE and OPEN_AI_KEY (type Secret).
+name = "home-project"
+pages_build_output_dir = ".deploy"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "backyard"
+database_id = "<your-database-id>"
+
+# Imported / generated model files. KV rather than R2 because R2 asks for a
+# card even on its free tier (Mari's choice, 2026-09-30).
+[[kv_namespaces]]
+binding = "FILES"
+id = "<your-kv-id>"

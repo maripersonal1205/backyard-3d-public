@@ -1,0 +1,76 @@
+{
+  "surfaces": [
+    {
+      "id": "lawn-lush",
+      "label": "Lush lawn",
+      "tile": 1.5,
+      "color": "lawn-lush/color.webp",
+      "normal": "lawn-lush/normal.jpg",
+      "rough": "lawn-lush/rough.webp",
+      "swatch": "lawn-lush/swatch.webp"
+    },
+    {
+      "id": "concrete-brushed",
+      "label": "Brushed concrete",
+      "tile": 2.5,
+      "color": "concrete-brushed/color.webp",
+      "normal": "concrete-brushed/normal.webp",
+      "rough": "concrete-brushed/rough.webp",
+      "swatch": "concrete-brushed/swatch.webp"
+    },
+    {
+      "id": "concrete-aggregate",
+      "label": "Exposed aggregate",
+      "tile": 1.6,
+      "color": "concrete-aggregate/color.webp",
+      "normal": "concrete-aggregate/normal.webp",
+      "rough": "concrete-aggregate/rough.webp",
+      "swatch": "concrete-aggregate/swatch.webp"
+    },
+    {
+      "id": "pavers-brick",
+      "label": "Red brick pavers",
+      "tile": 2.0,
+      "color": "pavers-brick/color.webp",
+      "normal": "pavers-brick/normal.webp",
+      "rough": "pavers-brick/rough.webp",
+      "swatch": "pavers-brick/swatch.webp"
+    },
+    {
+      "id": "pavers-stone",
+      "label": "Grey stone pavers",
+      "tile": 3.0,
+      "color": "pavers-stone/color.webp",
+      "normal": "pavers-stone/normal.jpg",
+      "rough": "pavers-stone/rough.webp",
+      "swatch": "pavers-stone/swatch.webp"
+    },
+    {
+      "id": "gravel",
+      "label": "Gravel",
+      "tile": 2.0,
+      "color": "gravel/color.webp",
+      "normal": "gravel/normal.jpg",
+      "rough": "gravel/rough.webp",
+      "swatch": "gravel/swatch.webp"
+    },
+    {
+      "id": "mulch",
+      "label": "Bark mulch",
+      "tile": 2.0,
+      "color": "mulch/color.webp",
+      "normal": "mulch/normal.webp",
+      "rough": "mulch/rough.webp",
+      "swatch": "mulch/swatch.webp"
+    },
+    {
+      "id": "decking",
+      "label": "Wood decking",
+      "tile": 1.8,
+      "color": "decking/color.webp",
+      "normal": "decking/normal.webp",
+      "rough": "decking/rough.webp",
+      "swatch": "decking/swatch.webp"
+    }
+  ]
+}

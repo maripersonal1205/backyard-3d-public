@@ -1,0 +1,33 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backyard",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8743"],
+      "port": 8743,
+      "autoPort": false
+    },
+    {
+      "name": "backyard-cloud-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/dev-server.mjs", "8745"],
+      "port": 8745,
+      "autoPort": false
+    },
+    {
+      "name": "backyard-demo-site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8747", "--directory", "demo/site"],
+      "port": 8747,
+      "autoPort": false
+    },
+    {
+      "name": "backyard-demo",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8746"],
+      "port": 8746,
+      "autoPort": false
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "items": [
+    {
+      "id": "house-canopy",
+      "label": "Patio canopy",
+      "category": "Shade",
+      "file": "models/house-canopy.glb",
+      "thumbnail": "thumbs/house-canopy.png",
+      "tags": [
+        "awning",
+        "pergola",
+        "shade",
+        "cover",
+        "fabric"
+      ],
+      "keepHeight": true
+    },
+    {
+      "id": "lavender-bush",
+      "label": "Lavender bush",
+      "category": "Plants",
+      "file": "models/lavender-bush.glb",
+      "thumbnail": "thumbs/lavender-bush.png",
+      "tags": [
+        "lavender",
+        "herb",
+        "flowers",
+        "purple",
+        "shrub"
+      ]
+    },
+    {
+      "id": "lemongrass-clump",
+      "label": "Lemongrass",
+      "category": "Plants",
+      "file": "models/lemongrass-clump.glb",
+      "thumbnail": "thumbs/lemongrass-clump.png",
+      "tags": [
+        "lemongrass",
+        "herb",
+        "grass",
+        "ornamental grass"
+      ]
+    },
+    {
+      "id": "avocado-tree",
+      "label": "Avocado tree",
+      "category": "Plants",
+      "file": "models/avocado-tree.glb",
+      "thumbnail": "thumbs/avocado-tree.png",
+      "tags": [
+        "avocado",
+        "fruit tree",
+        "tree"
+      ]
+    },
+    {
+      "id": "lemon-tree",
+      "label": "Lemon tree",
+      "category": "Plants",
+      "file": "models/lemon-tree.glb",
+      "thumbnail": "thumbs/lemon-tree.png",
+      "tags": [
+        "lemon",
+        "citrus",
+        "fruit tree",
+        "tree"
+      ]
+    },
+    {
+      "id": "teak-bench",
+      "label": "Teak bench",
+      "category": "Seating",
+      "file": "models/teak-bench.glb",
+      "thumbnail": "thumbs/teak-bench.png",
+      "tags": [
+        "bench",
+        "seat",
+        "teak",
+        "wood"
+      ]
+    },
+    {
+      "id": "teak-lounge-chair",
+      "label": "Teak lounge chair",
+      "category": "Seating",
+      "file": "models/teak-lounge-chair.glb",
+      "thumbnail": "thumbs/teak-lounge-chair.png",
+      "tags": [
+        "chair",
+        "lounge",
+        "teak",
+        "wood",
+        "cushions",
+        "outdoor"
+      ]
+    },
+    {
+      "id": "teak-coffee-table",
+      "label": "Teak coffee table",
+      "category": "Tables",
+      "file": "models/teak-coffee-table.glb",
+      "thumbnail": "thumbs/teak-coffee-table.png",
+      "tags": [
+        "coffee table",
+        "teak",
+        "wood",
+        "slatted",
+        "outdoor"
+      ]
+    },
+    {
+      "id": "concrete-fire-pit",
+      "label": "Square fire pit",
+      "category": "Decor",
+      "file": "models/concrete-fire-pit.glb",
+      "thumbnail": "thumbs/concrete-fire-pit.png",
+      "tags": [
+        "fire pit",
+        "concrete",
+        "square",
+        "stone",
+        "outdoor"
+      ]
+    },
+    {
+      "id": "house-string-lights",
+      "label": "Patio string lights",
+      "category": "Lighting",
+      "tags": [
+        "lights",
+        "string lights",
+        "bistro",
+        "caf\u00e9",
+        "patio",
+        "evening"
+      ],
+      "file": "models/house-string-lights.glb",
+      "thumbnail": "thumbs/house-string-lights.png",
+      "keepHeight": true
+    }
+  ]
+}

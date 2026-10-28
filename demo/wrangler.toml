@@ -1,0 +1,11 @@
+# Cloudflare Pages project for the public demo (no passcode, nothing saved).
+# Connected to GitHub (this repository), publishing `main`,
+# with root directory `demo` and build command
+# `node ../tools/stage-deploy.mjs --demo` (writes demo/site/).
+#
+# This file exists so Cloudflare doesn't use the family app's wrangler.toml in
+# the folder above: the demo has no database, no file storage and no secrets.
+# Don't add bindings here.
+name = "backyard-demo-mhirano"
+pages_build_output_dir = "site"
+compatibility_date = "2026-09-01"

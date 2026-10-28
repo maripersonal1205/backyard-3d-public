@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Stamped by tools/stage-deploy.mjs on each deploy; see js/update-check.js -->
+<meta name="app-version" content="dev" />
+<meta name="app-mode" content="full" />
+<title>Backyard 3D Viewer</title>
+<link rel="stylesheet" href="css/viewer.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="loading">Loading backyard…</div>
+
+<!-- Plan switcher: separate versions of the layout -->
+<div id="plan-switcher">
+  <div class="plan-bar">
+    <button id="plan-button" class="floating" aria-haspopup="true" aria-expanded="false" aria-controls="plan-menu" title="Switch plan">
+      <span id="plan-name"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <span id="save-status" class="save-status" role="status" hidden></span>
+  </div>
+  <div id="plan-menu" class="floating" hidden>
+    <ul id="plan-list"></ul>
+    <button id="plan-new" class="plan-new">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      New plan
+    </button>
+  </div>
+  <!-- A plan's ⋯ menu (placed next to its ⋯ button) -->
+  <div id="plan-more-menu" class="floating plan-popover" role="menu" hidden>
+    <button role="menuitem" data-act="rename">Rename</button>
+    <button role="menuitem" data-act="duplicate">Duplicate</button>
+    <button role="menuitem" data-act="delete" class="danger">Delete</button>
+  </div>
+  <dialog id="plan-delete-dialog" class="app-dialog" aria-labelledby="plan-delete-title">
+    <form method="dialog">
+      <h2 id="plan-delete-title">Delete this plan?</h2>
+      <p class="dialog-text">You won’t be able to get it back once you take this action.</p>
+      <div class="dialog-actions">
+        <button value="cancel" class="secondary-btn">Cancel</button>
+        <button value="delete" class="danger-fill-btn">Delete</button>
+      </div>
+    </form>
+  </dialog>
+</div>
+
+<!-- Top toolbar: view mode · undo/redo · time of day -->
+<header id="toolbar" class="toolbar">
+  <div class="tb-group seg" role="group" aria-label="View">
+    <button data-mode="orbit" class="active" aria-pressed="true">Orbit</button>
+    <button data-mode="plan" aria-pressed="false">Plan</button>
+    <button data-mode="walk" aria-pressed="false">Walk</button>
+  </div>
+  <div class="tb-group history">
+    <button id="undo" class="icon-btn" title="Undo (⌘Z)" aria-label="Undo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+    </button>
+    <button id="redo" class="icon-btn" title="Redo (⇧⌘Z)" aria-label="Redo" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+    </button>
+  </div>
+  <div class="tb-group time">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    <input id="time" type="range" min="6" max="20" step="0.25" value="10" aria-label="Time of day" />
+    <output id="time-label" for="time">10:00 am</output>
+  </div>
+</header>
+<p class="view-only-note">Editing is available on larger screens</p>
+
+<!-- My items: collapsed pill ⇄ floating panel -->
+<button id="items-pill" class="floating" aria-expanded="false" aria-controls="items-panel">
+  My items
+  <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></span>
+</button>
+<aside id="items-panel" class="floating" aria-label="My items" hidden>
+  <div class="panel-head">
+    <h2>My items</h2>
+    <button id="items-collapse" class="icon-btn" title="Collapse" aria-label="Collapse My items">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/><path d="M17 4h4v16h-4z" fill="currentColor" stroke="none" opacity=".35"/></svg>
+    </button>
+  </div>
+  <p class="panel-desc">Click an item, or drag it into the space.</p>
+  <input id="items-search" type="search" placeholder="Search" aria-label="Search items" />
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="library" aria-selected="true">All <span class="count" id="count-library"></span></button>
+    <button role="tab" data-tab="yard" aria-selected="false">In use <span class="count" id="count-yard"></span></button>
+    <button role="tab" data-tab="ai" aria-selected="false" hidden><span class="gen-live" aria-hidden="true"></span>Generated <span class="count" id="count-ai"></span></button>
+    <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+  </div>
+  <ul id="items-list" class="item-list"></ul>
+  <div id="items-settings" class="settings-pane" hidden>
+    <label class="setting">
+      <span class="setting-text">
+        <b>Items can go past the walls</b>
+        <span>Items can hang over the walls and the house, so they can turn freely. When this is off, items stay fully inside the walls.</span>
+      </span>
+      <input type="checkbox" id="setting-over-walls" class="switch" role="switch" />
+    </label>
+    <section class="setting-group" aria-labelledby="sun-title">
+      <h3 id="sun-title">Sun direction</h3>
+      <p>Set the date, time zone and the direction your yard faces, so the sun moves the way it really would.</p>
+      <p class="field-label" id="sun-date-title">Date</p>
+      <div class="date-field">
+        <button type="button" id="sun-date" class="select-btn" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="sun-date-title sun-date-label"><span id="sun-date-label"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="sun-calendar" class="popover calendar" role="dialog" aria-label="Choose a date" hidden>
+          <div class="cal-head">
+            <button type="button" class="icon-btn" id="cal-prev" aria-label="Previous month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <b id="cal-month"></b>
+            <button type="button" class="icon-btn" id="cal-next" aria-label="Next month">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <button type="button" class="link-btn cal-today" id="cal-today">Today</button>
+        </div>
+      </div>
+      <p class="field-label" id="sun-zone-title">Time zone</p>
+      <button type="button" id="sun-zone" class="select-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="sun-zone-title sun-zone-label"><span id="sun-zone-label"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <ul id="sun-zone-list" class="popover option-list" role="listbox" aria-labelledby="sun-zone-title" hidden></ul>
+      <p class="field-label" id="sun-facing-title">Yard faces</p>
+      <button type="button" id="sun-facing" class="select-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="sun-facing-title sun-facing-label"><span id="sun-facing-label"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <ul id="sun-facing-list" class="popover option-list" role="listbox" aria-labelledby="sun-facing-title" hidden></ul>
+    </section>
+  </div>
+  <div class="panel-foot">
+    <button id="reset-yard" class="link-btn">Revert to original</button>
+    <button id="create-new" class="secondary-btn create-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Create new
+    </button>
+  </div>
+</aside>
+
+<!-- Create new: choose Import or Generate (shared app; the local app goes straight to Import) -->
+<dialog id="create-dialog" class="app-dialog" aria-labelledby="create-title">
+  <div class="dialog-head">
+    <h2 id="create-title">Create new</h2>
+    <button type="button" id="create-cancel" class="icon-btn" title="Close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <p class="dialog-sub">How would you like to create new items?</p>
+  <div class="create-choices">
+    <button type="button" id="create-import" class="choice-row">
+      <span class="choice-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></span>
+      <span class="choice-text"><span class="choice-title">Import .glb files</span><span class="choice-desc">Add a 3D model file from your computer.</span></span>
+      <svg class="choice-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </button>
+    <button type="button" id="create-generate" class="choice-row">
+      <span class="choice-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>
+      <span class="choice-text"><span class="choice-title">Generate</span><span class="choice-desc">Make one with AI from words or a photo.</span></span>
+      <svg class="choice-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </button>
+  </div>
+</dialog>
+
+<!-- Import a .glb into the Library -->
+<input id="import-file" type="file" accept=".glb,model/gltf-binary" hidden />
+<dialog id="import-dialog" class="app-dialog" aria-labelledby="import-title">
+  <form id="import-form">
+    <h2 id="import-title">Import model</h2>
+    <div class="import-body">
+      <img id="import-preview" alt="" />
+      <div class="import-fields">
+        <label class="field"><span>Name</span><input id="import-name" type="text" maxlength="60" required /></label>
+        <label class="field"><span>Height</span>
+          <span class="dim-box"><input id="import-height" type="number" step="0.1" min="0.1" inputmode="decimal" required /><span>ft</span></span>
+        </label>
+        <p id="import-footprint" class="import-note"></p>
+      </div>
+    </div>
+    <p id="import-note" class="import-note"></p>
+    <div class="dialog-actions">
+      <button type="button" id="import-cancel" class="secondary-btn">Cancel</button>
+      <button type="submit" id="import-submit" class="primary-btn">Add to Library</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Create a Library item with AI (shared app only) -->
+<dialog id="gen-dialog" class="app-dialog" aria-labelledby="gen-title">
+  <form id="gen-form">
+    <button type="button" id="gen-back" class="back-btn" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Back
+    </button>
+    <h2 id="gen-title">Generate with AI</h2>
+    <p id="gen-demo-note" class="gen-demo-note" hidden></p>
+    <div class="seg" role="tablist" aria-label="Start from">
+      <button type="button" role="tab" data-kind="text" aria-selected="true">Describe it</button>
+      <button type="button" role="tab" data-kind="image" aria-selected="false">From a photo</button>
+    </div>
+    <div data-pane="text">
+      <label class="field"><span>What should it be?</span>
+        <textarea id="gen-prompt" rows="3" maxlength="800" placeholder="e.g. hanging egg chair with a white cushion"></textarea>
+      </label>
+      <p class="import-note">Describe one object: its shape, materials and colours. Leave out the background.</p>
+    </div>
+    <div data-pane="image" hidden>
+      <div class="gen-photo">
+        <img id="gen-photo-preview" alt="" hidden />
+        <button type="button" id="gen-photo-pick" class="secondary-btn">Choose a photo…</button>
+        <input id="gen-photo" type="file" accept="image/*" hidden />
+      </div>
+      <label class="field"><span>Name</span><input id="gen-name" type="text" maxlength="60" placeholder="e.g. Blue ceramic planter" /></label>
+      <p class="import-note">One object, clearly visible, ideally on a plain background. A product photo from a store website works well.</p>
+    </div>
+    <p id="gen-credits" class="gen-credits"></p>
+    <div class="dialog-actions">
+      <button type="button" id="gen-cancel" class="secondary-btn">Cancel</button>
+      <button type="submit" id="gen-submit" class="primary-btn">Create</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Selected item controls -->
+<section id="inspector" class="floating" aria-label="Selected item" hidden>
+  <div class="insp-head">
+    <b id="insp-name">–</b>
+    <button id="insp-close" class="icon-btn" title="Deselect (Esc)" aria-label="Deselect">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="insp-dims">
+    <span class="insp-label">Dimensions</span>
+    <label class="dim"><span>H</span><span class="dim-box"><input id="dim-h" type="number" step="0.1" min="0.1" inputmode="decimal" /><span>ft</span><span class="dim-step"><button type="button" tabindex="-1" data-step="1" aria-label="Increase">▲</button><button type="button" tabindex="-1" data-step="-1" aria-label="Decrease">▼</button></span></span></label>
+    <label class="dim"><span>W</span><span class="dim-box"><input id="dim-w" type="number" step="0.1" min="0.1" inputmode="decimal" /><span>ft</span><span class="dim-step"><button type="button" tabindex="-1" data-step="1" aria-label="Increase">▲</button><button type="button" tabindex="-1" data-step="-1" aria-label="Decrease">▼</button></span></span></label>
+    <label class="dim"><span>D</span><span class="dim-box"><input id="dim-d" type="number" step="0.1" min="0.1" inputmode="decimal" /><span>ft</span><span class="dim-step"><button type="button" tabindex="-1" data-step="1" aria-label="Increase">▲</button><button type="button" tabindex="-1" data-step="-1" aria-label="Decrease">▼</button></span></span></label>
+    <button id="dim-lock" class="icon-btn" aria-pressed="true" title="Keep proportions" aria-label="Keep proportions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+    </button>
+  </div>
+  <div id="insp-colors" class="insp-colors" hidden></div>
+  <div id="insp-surfaces" class="insp-surfaces" role="group" aria-label="Surface" hidden></div>
+  <div class="insp-actions">
+    <div class="turn">
+      <span>Turn</span>
+      <button id="turn-left" class="icon-btn" title="Turn left 15°" aria-label="Turn left 15 degrees">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <button id="turn-right" class="icon-btn" title="Turn right 15°" aria-label="Turn right 15 degrees">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      </button>
+    </div>
+    <div class="insp-end">
+      <button id="insp-remove" class="danger-btn">Remove</button>
+    </div>
+  </div>
+  <p id="insp-note" class="insp-note" hidden></p>
+</section>
+
+<div id="hint" class="floating"><span id="hint-text"></span><button id="hint-close" class="icon-btn" title="Hide this tip" aria-label="Hide this tip">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+</button></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="update-note" class="floating update-note" role="status" hidden>
+  A new version of the app is available.
+  <button id="update-reload" class="primary-btn">Reload</button>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

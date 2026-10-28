@@ -1,0 +1,20 @@
+# Not part of the app
+backyard-original.glb
+.DS_Store
+
+# Local test data and build output
+.dev/
+.deploy/
+demo/site/
+.wrangler/
+
+# Generated from library/ by tools/bundle-builder.mjs
+functions/_builder_files.js
+
+# Builder scratch folders and Python caches
+library/.builder-check/
+library/.builder-recovery/
+__pycache__/
+
+# Personal Claude Code settings
+.claude/settings.local.json
