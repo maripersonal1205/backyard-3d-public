@@ -46,17 +46,6 @@ I built it with [Claude Code](https://claude.com/claude-code) as my engineering 
 and the 3D Library items and sample yard with OpenAI's Codex: I made the product and
 design decisions and reviewed the results.
 
-## Run it on your computer
-
-```bash
-python3 -m http.server 8743   # then open http://localhost:8743/viewer.html
-```
-
-Plans are saved in your browser. To try the server version (plans saved to a local
-database, passcode `family`), run `node tools/dev-server.mjs` with
-[Node.js](https://nodejs.org) 24 or newer and open http://localhost:8745.
-Add `?demo` to the address to see the demo mode.
-
 ## Credits
 
 Ground textures are CC0 from Poly Haven and ambientCG
